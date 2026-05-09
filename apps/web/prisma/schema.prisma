@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  timezone  String     @default("America/Mexico_City")
+  users     User[]
+  schedules Schedule[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  password    String
+  role        Role         @default(EMPLOYEE)
+  department  String?
+  position    String?
+  employeeId  String?
+  phone       String?
+  active      Boolean      @default(true)
+  companyId   String?
+  company     Company?     @relation(fields: [companyId], references: [id])
+  scheduleId  String?
+  schedule    Schedule?    @relation(fields: [scheduleId], references: [id])
+  attendances Attendance[]
+  incidents   Incident[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+}
+
+model Schedule {
+  id               String   @id @default(cuid())
+  name             String
+  checkInTime      String
+  checkOutTime     String
+  toleranceMinutes Int      @default(15)
+  companyId        String?
+  company          Company? @relation(fields: [companyId], references: [id])
+  users            User[]
+  createdAt        DateTime @default(now())
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  userId      String
+  checkIn     DateTime
+  checkOut    DateTime?
+  workedHours Float?
+  late        Boolean  @default(false)
+  lateMinutes Int      @default(0)
+  overtime    Float    @default(0)
+  status      String   @default("ACTIVE")
+  notes       String?
+  latitude    Float?
+  longitude   Float?
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Incident {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  status     String   @default("PENDING")
+  approvedBy String?
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  RH
+  SUPERVISOR
+  EMPLOYEE
+}
