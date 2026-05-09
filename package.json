@@ -1,0 +1,11 @@
+{
+  "name": "reloj-checador",
+
+  "private": true,
+
+  "scripts": {
+    "dev": "pnpm -r run start:dev",
+
+    "build": "pnpm -r run build"
+  }
+}
